@@ -1,0 +1,111 @@
+name: legal-assistant
+version: 1.0.0
+description: >
+  AI agent environment for legal document analysis.
+  Tasks include format compliance checking, PII extraction with content review,
+  and Indian law compliance checking (Indian Contract Act 1872, DPDP Act 2023,
+  Consumer Protection Act 2019, Arbitration and Conciliation Act 1996).
+author: IrfanSarang
+tags:
+  - legal
+  - nlp
+  - compliance
+  - pii-extraction
+  - indian-law
+  - contract-analysis
+  - openenv
+
+tasks:
+  - id: format-check
+    name: Document Format Compliance Check
+    difficulty: easy
+    max_steps: 5
+    description: >
+      Check legal document for formatting compliance: page numbers,
+      text justification, font standards, margin compliance, heading
+      consistency, and line spacing. Produce a structured compliance report.
+    reward_range: [0.0, 1.0]
+    expected_score_frontier_model: 0.75
+
+  - id: content-review
+    name: Content Review and PII Extraction
+    difficulty: medium
+    max_steps: 8
+    description: >
+      Identify grammatical errors, spelling mistakes, and logical
+      inconsistencies. Extract all PII: names, emails, phone numbers,
+      addresses, company names, and shop names. Produce annotated report.
+    reward_range: [0.0, 1.0]
+    expected_score_frontier_model: 0.62
+
+  - id: compliance-check
+    name: Indian Law Compliance Check
+    difficulty: hard
+    max_steps: 10
+    description: >
+      Analyze contract clauses for compliance with Indian law including
+      Indian Contract Act 1872, IT Act 2000, Consumer Protection Act 2019,
+      DPDP Act 2023, and Arbitration and Conciliation Act 1996.
+      Identify non-compliant clauses, cite specific provisions, and suggest
+      compliant alternatives.
+    reward_range: [0.0, 1.0]
+    expected_score_frontier_model: 0.45
+
+observation_space:
+  type: structured_text
+  fields:
+    - name: task
+      type: string
+      description: Task identifier
+    - name: document_text
+      type: string
+      description: Full legal document text to analyze
+    - name: instructions
+      type: string
+      description: Task-specific analysis instructions
+    - name: step
+      type: integer
+      description: Current step number
+    - name: max_steps
+      type: integer
+      description: Maximum steps in episode
+    - name: previous_reward
+      type: float
+      description: Reward from previous step
+
+action_space:
+  type: structured_json
+  fields:
+    - name: task
+      type: string
+      description: Task being performed
+    - name: analysis
+      type: dict
+      description: Structured analysis output (schema varies by task)
+    - name: step_notes
+      type: string
+      description: Optional agent reasoning trace
+
+reward:
+  range: [0.0, 1.0]
+  shaped: true
+  description: >
+    Weighted combination of task-specific metrics.
+    format-check: F1 on issue types + summary quality + false positive penalty.
+    content-review: PII extraction F1 (per category) + error detection recall + summary.
+    compliance-check: Law identification F1 + section citation accuracy + suggestion quality + completeness.
+
+endpoints:
+  reset: POST /env/reset
+  step: POST /env/step
+  state: GET /env/state
+  health: GET /
+
+inference:
+  script: inference.py
+  env_vars:
+    - API_BASE_URL
+    - MODEL_NAME
+    - HF_TOKEN
+  max_runtime_minutes: 20
+  client: openai

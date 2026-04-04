@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "legal-assistant-env"
+version = "1.0.0"
+description = "AI agent environment for legal document analysis — OpenEnv compatible"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "IrfanSarang" }
+]
+keywords = ["legal", "nlp", "compliance", "pii-extraction", "indian-law", "openenv"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "fastapi==0.115.0",
+    "uvicorn[standard]==0.30.6",
+    "pydantic==2.9.2",
+    "pydantic-settings==2.5.2",
+    "httpx==0.27.2",
+    "openai==1.51.0",
+    "python-dotenv==1.0.1",
+    "openenv-core"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.3",
+    "pytest-asyncio==0.24.0",
+    "httpx==0.27.2",
+    "ruff==0.6.9",
+    "mypy==1.11.2",
+]
+
+[project.scripts]
+legal-assistant = "app.main:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# ── Ruff (linter) ─────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+
+# ── Mypy (type checker) ───────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
+warn_return_any = false
+
+# ── OpenEnv multi-mode deployment ─────────────────────────────────────────────
+[tool.openenv]
+name = "legal-assistant"
+version = "1.0.0"
+entry_point = "app.main:app"
+inference_script = "inference.py"
+tasks = ["format-check", "content-review", "compliance-check"]
