@@ -96,9 +96,9 @@ reward:
     compliance-check: Law identification F1 + section citation accuracy + suggestion quality + completeness.
 
 endpoints:
-  reset: POST /env/reset
-  step: POST /env/step
-  state: GET /env/state
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
   health: GET /
 
 inference:

@@ -71,12 +71,12 @@ def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> No
 # ── Env helpers ───────────────────────────────────────────────────────────────
 
 def env_reset(task: str) -> Dict[str, Any]:
-    resp = http.post("/env/reset", params={"task": task})
+    resp = http.post("/reset", params={"task": task})
     resp.raise_for_status()
     return resp.json()
 
 def env_step(payload: Dict[str, Any]) -> Dict[str, Any]:
-    resp = http.post("/env/step", json=payload)
+    resp = http.post("/step", json=payload)
     resp.raise_for_status()
     return resp.json()
 

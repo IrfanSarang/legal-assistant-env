@@ -1,8 +1,8 @@
 """
 OpenEnv environment API routes.
-  POST /env/reset  → Observation
-  POST /env/step   → StepResponse
-  GET  /env/state  → CurrentState
+  POST /reset  → Observation
+  POST /step   → StepResponse
+  GET  /state  → CurrentState
 """
 from fastapi import APIRouter, Query
 
@@ -14,18 +14,13 @@ from app.features.environment.models import (
     StepResponse,
 )
 
-router = APIRouter(prefix="/env", tags=["environment"])
+router = APIRouter(tags=["environment"])
 
 # Singleton env instance (stateful per process — fine for single-user HF Space)
 _env = LegalAssistantEnv()
 
 
-@router.post(
-    "/reset",
-    response_model=Observation,
-    summary="Reset environment",
-    description="Start a new episode. Returns the initial observation with the document and instructions.",
-)
+@router.post("/reset", response_model=Observation, summary="Reset environment")
 async def reset(
     task: str = Query(
         default="format-check",
@@ -39,22 +34,12 @@ async def reset(
     return _env.reset(task=task, fixture_id=fixture_id)
 
 
-@router.post(
-    "/step",
-    response_model=StepResponse,
-    summary="Submit agent action",
-    description="Submit the agent's analysis. Returns reward, next observation, and done flag.",
-)
+@router.post("/step", response_model=StepResponse, summary="Submit agent action")
 async def step(action: Action) -> StepResponse:
     obs, reward, done, info = _env.step(action)
     return StepResponse(observation=obs, reward=reward, done=done, info=info)
 
 
-@router.get(
-    "/state",
-    response_model=CurrentState,
-    summary="Get current state",
-    description="Returns a snapshot of the current episode state without advancing it.",
-)
+@router.get("/state", response_model=CurrentState, summary="Get current state")
 async def state() -> CurrentState:
     return _env.state()
